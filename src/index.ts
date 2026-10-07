@@ -66,6 +66,14 @@ let server: ReturnType<typeof app.listen> | null = null;
 export const startServer = async () => {
   if (server) return server;
 
+  // Habilitar SQLite WAL y modo concurrente seguro
+  try {
+    const { enableWal } = await import("./db/index.js");
+    await enableWal();
+  } catch (err) {
+    logger.error({ err }, "Error habilitando SQLite WAL al arrancar");
+  }
+
   // Reconciliar jerarquía de cargos antes de arrancar el servidor
   try {
     const { reconcileCargosHierarchy } = await import("./modules/cargos/reconciliation.js");

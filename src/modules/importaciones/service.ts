@@ -149,10 +149,8 @@ export const importKpiCsv = async (input: ImportCsvInput, client: PrismaClient =
 
       await tx.kpiResultado.deleteMany();
 
-      for (const row of rows) {
-        const data = rowToResultData(row, importacion.id);
-        await tx.kpiResultado.create({ data });
-      }
+      const kpiData = rows.map((row) => rowToResultData(row, importacion.id));
+      await tx.kpiResultado.createMany({ data: kpiData });
 
       // Desactivar cargos funcionales ausentes en la importación (excluyendo el cargo estructural especial 1 / MBC)
       const presentCargoIds = cargos.map((c) => c.cargoId);

@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Importacion {
+  id           String         @id @default(cuid())
+  filename     String
+  sha256       String
+  source       String         @default("manual")
+  sourceVersion String?
+  createdAt    DateTime       @default(now())
+  importedAt   DateTime?
+  status       String
+  rowCount     Int            @default(0)
+  errorMessage String?
+  resultados   KpiResultado[]
+
+  @@index([sha256, status])
+  @@index([source, sourceVersion])
+}
+
+model KpiSyncState {
+  id                 String    @id
+  source             String
+  enabled            Boolean   @default(false)
+  status             String    @default("IDLE")
+  lastCheckedAt      DateTime?
+  lastDetectedAt     DateTime?
+  lastDetectedETag   String?
+  lastImportedAt     DateTime?
+  lastImportedETag   String?
+  lastImportacionId  String?
+  lastFilename       String?
+  lastSha256         String?
+  lastRowCount       Int?
+  lastError          String?
+  updatedAt          DateTime  @updatedAt
+}
+
+model Cargo {
+  id        Int            @id
+  nombre    String
+  parentId  Int?
+  activo    Boolean        @default(true)
+  parent    Cargo?         @relation("CargoHierarchy", fields: [parentId], references: [id])
+  children  Cargo[]        @relation("CargoHierarchy")
+  usuarios  Usuario[]
+  resultados KpiResultado[]
+}
+
+model Usuario {
+  id                    String   @id @default(cuid())
+  nombre                String
+  email                 String   @unique
+  username              String?  @unique
+  passwordHash          String
+  passwordEncrypted     String?
+  role                  String
+  cargoId               Int?
+  cargo                 Cargo?   @relation(fields: [cargoId], references: [id])
+  activo                Boolean  @default(true)
+  autoProvisioned       Boolean  @default(false)
+  lastPasswordChangedAt DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  sessions              RefreshSession[]
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorUserId  String?
+  targetUserId String?
+  event        String
+  metadata     String?
+  createdAt    DateTime @default(now())
+
+  @@index([event, createdAt])
+  @@index([actorUserId])
+  @@index([targetUserId])
+}
+
+model RefreshSession {
+  id         String    @id @default(cuid())
+  userId     String
+  user       Usuario   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  userAgent  String?
+  ip         String?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Kpi {
+  id         String         @id
+  nombre     String
+  activo     Boolean        @default(true)
+  resultados KpiResultado[]
+}
+
+model KpiResultado {
+  id                       String      @id @default(cuid())
+  importacionId            String
+  importacion              Importacion @relation(fields: [importacionId], references: [id])
+  anio                     Int
+  periodo                  Int
+  cargoId                  Int
+  cargo                    Cargo       @relation(fields: [cargoId], references: [id])
+  orden                    Int
+  kpiId                    String
+  kpi                      Kpi         @relation(fields: [kpiId], references: [id])
+  valorRaw                 String?
+  resultadoRaw             String?
+  objetivoRaw              String?
+  valorRealRaw             String?
+  calificacionRaw          String?
+  tendenciaRaw             String?
+  parametrosRaw            String?
+  sumaValorRaw             String?
+  sumaCalificacionRaw      String?
+  calificacionGeneralRaw   String?
+  valorNumero              Float?
+  resultadoNumero          Float?
+  objetivoNumero           Float?
+  valorRealNumero          Float?
+  calificacionNumero       Float?
+  createdAt                DateTime    @default(now())
+  updatedAt                DateTime    @updatedAt
+
+  @@unique([anio, periodo, cargoId, kpiId])
+  @@index([cargoId, anio, periodo])
+}

@@ -1,0 +1,50 @@
+module.exports = {
+  apps: [
+    {
+      name: 'kpi-backend',
+      script: 'dist/scripts/start-production.js',
+      exec_mode: 'fork',
+      shutdown_with_message: true,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3005,
+        TZ: 'America/Mexico_City',
+      },
+      env_production: {
+        NODE_ENV: 'production',
+        PORT: 3005,
+        TZ: 'America/Mexico_City',
+      },
+      autorestart: true,
+      max_restarts: 10,
+      restart_delay: 3000,
+      kill_timeout: 8000,
+      out_file: './logs/backend-out.log',
+      error_file: './logs/backend-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
+    },
+    {
+      name: 'kpi-sync-agent',
+      script: 'dist/src/sync-agent/index.js',
+      exec_mode: 'fork',
+      shutdown_with_message: true,
+      watch: false,
+      env: {
+        NODE_ENV: 'production',
+        TZ: 'America/Mexico_City',
+      },
+      env_production: {
+        NODE_ENV: 'production',
+        TZ: 'America/Mexico_City',
+      },
+      autorestart: true,
+      max_restarts: 10,
+      restart_delay: 5000,
+      kill_timeout: 8000,
+      out_file: './logs/sync-out.log',
+      error_file: './logs/sync-error.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
+    },
+  ],
+};

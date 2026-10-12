@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { parse } from "csv-parse/sync";
-import { CSV_HEADERS, cleanDisplay, parseOptionalNumber, parseRequiredInt, validateHeaders, type KpiCsvRow } from "./csv-normalize.js";
+import { CSV_HEADERS, cleanDisplay, normalizeHeaderName, parseOptionalNumber, parseRequiredInt, validateHeaders, type KpiCsvRow } from "./csv-normalize.js";
 
 export type ParsedKpiRow = {
   anio: number;
@@ -34,7 +34,7 @@ const parseRecords = (content: string): KpiCsvRow[] => {
     columns: (header: string[]) => {
       headers = header;
       validateHeaders(header);
-      return header;
+      return header.map(normalizeHeaderName);
     },
     skip_empty_lines: true,
     relax_column_count: false
@@ -66,16 +66,16 @@ export const parseKpiCsvContent = (content: string): ParsedKpiRow[] => {
       orden: parseRequiredInt(row["03 Orden"], "03 Orden", rowNumber),
       kpiId: cleanDisplay(row["06 Id"]),
       kpiNombre: cleanDisplay(row["08 KPI"]),
-      valorRaw: row["07 Valor"],
-      resultadoRaw: row["09 Resultado"],
-      objetivoRaw: row["10 Objetivo"],
-      valorRealRaw: row["11 Valor Real"],
-      calificacionRaw: row["12 Calificacion"],
-      tendenciaRaw: row["13 Tendencia"],
-      parametrosRaw: row["14 Parametros"],
-      sumaValorRaw: row["15 Suma Valor"],
-      sumaCalificacionRaw: row["16 Suma Calificacion"],
-      calificacionGeneralRaw: row["17 Calificacion General"],
+      valorRaw: cleanDisplay(row["07 Valor"]),
+      resultadoRaw: cleanDisplay(row["09 Resultado"]),
+      objetivoRaw: cleanDisplay(row["10 Objetivo"]),
+      valorRealRaw: cleanDisplay(row["11 Valor Real"]),
+      calificacionRaw: cleanDisplay(row["12 Calificacion"]),
+      tendenciaRaw: cleanDisplay(row["13 Tendencia"]),
+      parametrosRaw: cleanDisplay(row["14 Parametros"]),
+      sumaValorRaw: cleanDisplay(row["15 Suma Valor"]),
+      sumaCalificacionRaw: cleanDisplay(row["16 Suma Calificacion"]),
+      calificacionGeneralRaw: cleanDisplay(row["17 Calificacion General"]),
       valorNumero: parseOptionalNumber(row["07 Valor"]),
       resultadoNumero: parseOptionalNumber(row["09 Resultado"]),
       objetivoNumero: parseOptionalNumber(row["10 Objetivo"]),

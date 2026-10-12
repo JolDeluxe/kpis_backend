@@ -23,7 +23,11 @@ export type KpiCsvRow = Record<CsvHeader, string>;
 
 export const cleanDisplay = (value: string | null | undefined) => {
   if (value === undefined || value === null) return "";
-  return value.replace(/\u2003/g, " ").trim();
+  return value
+    .replace(/\u2003/g, " ")
+    .replace(/\?/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 };
 
 export const parseRequiredInt = (value: string, field: string, rowNumber: number) => {
@@ -48,9 +52,19 @@ export const parseOptionalNumber = (value: string | null | undefined): number | 
   return Number(withoutUnits);
 };
 
+export const normalizeHeaderName = (header: string): string => {
+  const trimmed = header.trim();
+  // Tolerar "01 Año", "01 A?o", "01 Ao" o variantes con BOM
+  if (/^01\s+A[\?ñ\u00f1\ufffd]?o$/i.test(trimmed)) {
+    return "01 Año";
+  }
+  return trimmed;
+};
+
 export const validateHeaders = (headers: string[]) => {
-  const missing = CSV_HEADERS.filter((header) => !headers.includes(header));
-  const extra = headers.filter((header) => !(CSV_HEADERS as readonly string[]).includes(header));
+  const normalizedHeaders = headers.map(normalizeHeaderName);
+  const missing = CSV_HEADERS.filter((header) => !normalizedHeaders.includes(header));
+  const extra = normalizedHeaders.filter((header) => !(CSV_HEADERS as readonly string[]).includes(header));
   if (missing.length > 0 || extra.length > 0) {
     throw new Error(`Encabezados invalidos. Faltan: ${missing.join(", ") || "ninguno"}. Extra: ${extra.join(", ") || "ninguno"}.`);
   }

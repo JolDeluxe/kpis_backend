@@ -30,6 +30,33 @@ export const cleanDisplay = (value: string | null | undefined) => {
     .trim();
 };
 
+export const formatCalificacionGeneral = (value: string | null | undefined): string => {
+  const cleaned = cleanDisplay(value);
+  if (!cleaned || /^NA$/i.test(cleaned)) return cleaned;
+
+  // Si ya viene con '%', ej: "89.25 %" o "89.25%"
+  if (cleaned.includes("%")) {
+    const numPart = cleaned.replace(/%/g, "").trim();
+    const parsed = Number(numPart);
+    if (!Number.isNaN(parsed)) {
+      return `${parsed.toFixed(2)} %`;
+    }
+    return cleaned;
+  }
+
+  // Si viene como número decimal (ej. 0.8925 -> 89.25 %) o entero (ej: 1 -> 100.00 %)
+  const parsed = Number(cleaned);
+  if (!Number.isNaN(parsed)) {
+    if (parsed <= 1) {
+      return `${(parsed * 100).toFixed(2)} %`;
+    }
+    // Si viene como escala 100 (ej. 89.25)
+    return `${parsed.toFixed(2)} %`;
+  }
+
+  return cleaned;
+};
+
 export const parseRequiredInt = (value: string, field: string, rowNumber: number) => {
   const normalized = cleanDisplay(value);
   if (!/^-?\d+$/.test(normalized)) {

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { parse } from "csv-parse/sync";
-import { CSV_HEADERS, cleanDisplay, normalizeHeaderName, parseOptionalNumber, parseRequiredInt, validateHeaders, type KpiCsvRow } from "./csv-normalize.js";
+import { CSV_HEADERS, cleanDisplay, formatCalificacionGeneral, normalizeHeaderName, parseOptionalNumber, parseRequiredInt, validateHeaders, type KpiCsvRow } from "./csv-normalize.js";
 
 export type ParsedKpiRow = {
   anio: number;
@@ -75,7 +75,7 @@ export const parseKpiCsvContent = (content: string): ParsedKpiRow[] => {
       parametrosRaw: cleanDisplay(row["14 Parametros"]),
       sumaValorRaw: cleanDisplay(row["15 Suma Valor"]),
       sumaCalificacionRaw: cleanDisplay(row["16 Suma Calificacion"]),
-      calificacionGeneralRaw: cleanDisplay(row["17 Calificacion General"]),
+      calificacionGeneralRaw: formatCalificacionGeneral(row["17 Calificacion General"]),
       valorNumero: parseOptionalNumber(row["07 Valor"]),
       resultadoNumero: parseOptionalNumber(row["09 Resultado"]),
       objetivoNumero: parseOptionalNumber(row["10 Objetivo"]),

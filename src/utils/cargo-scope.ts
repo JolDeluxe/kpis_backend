@@ -32,7 +32,7 @@ export const getDescendantCargoIds = (cargoId: number, cargos: CargoNode[]): num
 };
 
 export const getVisibleCargoIds = (user: ScopeUser, cargos: CargoNode[]): number[] => {
-  if (user.role === "ADMIN" || user.cargoId === 1 || user.cargoId === 100) {
+  if (user.role === "ADMIN" || user.cargoId === 1 || user.cargoId === 100 || (user.role === "CONSULTA" && user.cargoId === null)) {
     return cargos.filter((cargo) => cargo.activo).map((cargo) => cargo.id).sort((a, b) => a - b);
   }
   if (!user.cargoId) return [];
